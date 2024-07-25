@@ -1,134 +1,43 @@
 class Solution {
-
-    public String getDirections(TreeNode root, int startValue, int destValue) {
-        // Map to store parent nodes
-        Map<Integer, TreeNode> parentMap = new HashMap<>();
-
-        // Find the start node and populate parent map
-        TreeNode startNode = findStartNode(root, startValue);
-        populateParentMap(root, parentMap);
-
-        // Perform BFS to find the path
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.add(startNode);
-        Set<TreeNode> visitedNodes = new HashSet<>();
-        // Key: next node, Value: <current node, direction>
-        Map<TreeNode, Pair<TreeNode, String>> pathTracker = new HashMap<>();
-        visitedNodes.add(startNode);
-
-        while (!queue.isEmpty()) {
-            TreeNode currentNode = queue.poll();
-
-            // If destination is reached, return the path
-            if (currentNode.val == destValue) {
-                return backtrackPath(currentNode, pathTracker);
-            }
-
-            // Check and add parent node
-            if (parentMap.containsKey(currentNode.val)) {
-                TreeNode parentNode = parentMap.get(currentNode.val);
-                if (!visitedNodes.contains(parentNode)) {
-                    queue.add(parentNode);
-                    pathTracker.put(parentNode, new Pair(currentNode, "U"));
-                    visitedNodes.add(parentNode);
-                }
-            }
-
-            // Check and add left child
-            if (
-                currentNode.left != null &&
-                !visitedNodes.contains(currentNode.left)
-            ) {
-                queue.add(currentNode.left);
-                pathTracker.put(currentNode.left, new Pair(currentNode, "L"));
-                visitedNodes.add(currentNode.left);
-            }
-
-            // Check and add right child
-            if (
-                currentNode.right != null &&
-                !visitedNodes.contains(currentNode.right)
-            ) {
-                queue.add(currentNode.right);
-                pathTracker.put(currentNode.right, new Pair(currentNode, "R"));
-                visitedNodes.add(currentNode.right);
-            }
-        }
-
-        // This line should never be reached if the tree is valid
-        return "";
+    public int[] sortArray(int[] nums) {
+        mergeSort(nums, 0, nums.length - 1);
+        return nums;
     }
 
-    private String backtrackPath(
-        TreeNode node,
-        Map<TreeNode, Pair<TreeNode, String>> pathTracker
-    ) {
-        StringBuilder path = new StringBuilder();
-
-        // Construct the path
-        while (pathTracker.containsKey(node)) {
-            // Add the directions in reverse order and move on to the previous node
-            path.append(pathTracker.get(node).getValue());
-            node = pathTracker.get(node).getKey();
+    private void mergeSort(int[] array, int low, int high) {
+        if (low >= high) {
+            return;
         }
-
-        // Reverse the path
-        path.reverse();
-
-        return path.toString();
+        int mid = low + (high - low) / 2;
+        mergeSort(array, low, mid);
+        mergeSort(array, mid + 1, high);
+        merge(array, low, mid, high);
     }
 
-    private void populateParentMap(
-        TreeNode node,
-        Map<Integer, TreeNode> parentMap
-    ) {
-        if (node == null) return;
+    private void merge(int[] array, int low, int mid, int high) {
+        int n1 = mid - low + 1;
+        int n2 = high - mid;
+        int[] leftPart = new int[n1];
+        int[] rightPart = new int[n2];
 
-        // Add children to the map and recurse further
-        if (node.left != null) {
-            parentMap.put(node.left.val, node);
-            populateParentMap(node.left, parentMap);
+        System.arraycopy(array, low, leftPart, 0, n1);
+        System.arraycopy(array, mid + 1, rightPart, 0, n2);
+
+        int p1 = 0, p2 = 0, writeInd = low;
+        while (p1 < n1 && p2 < n2) {
+            if (leftPart[p1] <= rightPart[p2]) {
+                array[writeInd++] = leftPart[p1++];
+            } else {
+                array[writeInd++] = rightPart[p2++];
+            }
         }
 
-        if (node.right != null) {
-            parentMap.put(node.right.val, node);
-            populateParentMap(node.right, parentMap);
+        while (p1 < n1) {
+            array[writeInd++] = leftPart[p1++];
         }
-    }
 
-    private TreeNode findStartNode(TreeNode node, int startValue) {
-        if (node == null) return null;
-
-        if (node.val == startValue) return node;
-
-        TreeNode leftResult = findStartNode(node.left, startValue);
-
-        // If left subtree returns a node, it must be StartNode. Return it
-        // Otherwise, return whatever is returned by right subtree.
-        if (leftResult != null) return leftResult;
-        return findStartNode(node.right, startValue);
+        while (p2 < n2) {
+            array[writeInd++] = rightPart[p2++];
+        }
     }
 }
-class Solution {
-
-    public int[][] restoreMatrix(int[] rowSum, int[] colSum) {
-        int N = rowSum.length;
-        int M = colSum.length;
-
-        int[] currRowSum = new int[N];
-        int[] currColSum = new int[M];
-
-        int[][] origMatrix = new int[N][M];
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++) {
-                origMatrix[i][j] = Math.min(
-                    rowSum[i] - currRowSum[i],
-                    colSum[j] - currColSum[j]
-                );
-
-                currRowSum[i] += origMatrix[i][j];
-                currColSum[j] += origMatrix[i][j];
-            }
-        }
-        return origMatrix;
-    }
