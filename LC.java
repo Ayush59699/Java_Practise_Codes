@@ -1,43 +1,41 @@
-class Solution {
-    public int[] sortArray(int[] nums) {
-        mergeSort(nums, 0, nums.length - 1);
-        return nums;
-    }
+class KthLargest {
 
-    private void mergeSort(int[] array, int low, int high) {
-        if (low >= high) {
-            return;
+    List<Integer> stream;
+    int k;
+
+    public KthLargest(int k, int[] nums) {
+        stream = new ArrayList<Integer>(nums.length);
+        this.k = k;
+
+        for (int num : nums) {
+            stream.add(num);
         }
-        int mid = low + (high - low) / 2;
-        mergeSort(array, low, mid);
-        mergeSort(array, mid + 1, high);
-        merge(array, low, mid, high);
+
+        Collections.sort(stream);
     }
 
-    private void merge(int[] array, int low, int mid, int high) {
-        int n1 = mid - low + 1;
-        int n2 = high - mid;
-        int[] leftPart = new int[n1];
-        int[] rightPart = new int[n2];
+    public int add(int val) {
+        int index = getIndex(val);
+        // Add val to correct position
+        stream.add(index, val);
+        return stream.get(stream.size() - k);
+    }
 
-        System.arraycopy(array, low, leftPart, 0, n1);
-        System.arraycopy(array, mid + 1, rightPart, 0, n2);
-
-        int p1 = 0, p2 = 0, writeInd = low;
-        while (p1 < n1 && p2 < n2) {
-            if (leftPart[p1] <= rightPart[p2]) {
-                array[writeInd++] = leftPart[p1++];
+    private int getIndex(int val) {
+        int left = 0;
+        int right = stream.size() - 1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            int midElement = stream.get(mid);
+            if (midElement == val) return mid;
+            if (midElement > val) {
+                // Go to left half
+                right = mid - 1;
             } else {
-                array[writeInd++] = rightPart[p2++];
+                // Go to right half
+                left = mid + 1;
             }
         }
-
-        while (p1 < n1) {
-            array[writeInd++] = leftPart[p1++];
-        }
-
-        while (p2 < n2) {
-            array[writeInd++] = rightPart[p2++];
-        }
+        return left;
     }
 }
